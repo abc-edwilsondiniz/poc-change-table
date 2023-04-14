@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\EstoqueController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +16,7 @@ use App\Http\Controllers\TrackingController;
 */
  
 Route::get('/tracking', [TrackingController::class, 'index']);
+Route::get('/tracking-estoque', [EstoqueController::class, 'estoque']);
 
 Route::get('/', function () {
     return view('welcome');
