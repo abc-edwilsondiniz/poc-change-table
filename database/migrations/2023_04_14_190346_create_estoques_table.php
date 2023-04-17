@@ -26,9 +26,9 @@ return new class extends Migration {
             $table->decimal('quantidadeRecebida', 8, 3)->nullable(true);
             $table->date('dataPrevisaoRecebimento')->nullable(true);
             $table->timestamps();
-            
+
             //unique
-            $table->unique(['codpro', 'dv']);
+            $table->unique(['codpro', 'dv', 'fornecedor']);
         });
     }
 

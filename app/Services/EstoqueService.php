@@ -13,7 +13,7 @@ class EstoqueService {
      * retorna o ultimo valor q ainda não foi executado em busca dos trackings
      */
     public static function getLastVersionControle() {
-        $lastVersion = Configuracoes::where('nome', 'change_tracking_version')->first();
+        $lastVersion = Configuracoes::where('nome', 'change_tracking_estoque')->first();
 
         //ainda não tem versao na tabela de controle
         if (empty($lastVersion)) {
@@ -39,11 +39,11 @@ class EstoqueService {
     public static function updateLastTrackingTable($version) {
 
         //atualiza a ultima versao na tabela de controle
-        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_version')->first();
+        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_estoque')->first();
 
         if (empty($LastVersionTable)) {
             $LastVersionTable = new Configuracoes();
-            $LastVersionTable->nome = 'change_tracking_version';
+            $LastVersionTable->nome = 'change_tracking_estoque';
         }
 
         $LastVersionTable->valor = $version;
@@ -55,7 +55,7 @@ class EstoqueService {
      */
     public static function flushEstoque($dados) {
 
-        Estoque::upsert($dados, ['codProFabricante', 'dv'],
+        Estoque::upsert($dados, ['codProFabricante', 'dv', 'fornecedor'],
                 [
                     "codpro",
                     "dv",
