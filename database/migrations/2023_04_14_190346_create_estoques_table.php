@@ -16,19 +16,13 @@ return new class extends Migration {
             $table->id();
             $table->integer('codpro');
             $table->string('dv');
-            $table->string('fornecedor');
             $table->string('referencia');
-            $table->string('codProFabricante')->nullable(true);
-            $table->string('disponibilidade');
-            $table->smallInteger('prazo');
             $table->decimal('quantidade', 8, 3);
-            $table->integer('numeroPedido')->nullable(true);
-            $table->decimal('quantidadeRecebida', 8, 3)->nullable(true);
-            $table->date('dataPrevisaoRecebimento')->nullable(true);
+            $table->smallInteger('filial');
             $table->timestamps();
 
             //unique
-            $table->unique(['codpro', 'dv', 'fornecedor']);
+            $table->unique(['codpro', 'dv', 'filial']);
         });
     }
 
