@@ -55,20 +55,13 @@ class EstoqueService {
      */
     public static function flushEstoque($dados) {
 
-        Estoque::upsert($dados, ['codProFabricante', 'dv', 'fornecedor'],
+        Estoque::upsert($dados, ['codpro', 'dv', 'filial'],
                 [
                     "codpro",
                     "dv",
-                    "fornecedor",
                     "referencia",
-                    "codProFabricante",
-                    "dv",
-                    "disponibilidade",
-                    "prazo",
                     "quantidade",
-                    "numeroPedido",
-                    "quantidadeRecebida",
-                    "dataPrevisaoRecebimento",
+                    "filial",
         ]);
     }
 
@@ -79,44 +72,16 @@ class EstoqueService {
 
         $dados = DB::connection('sqlsrv_ERP')->select(
                 "SELECT
-            ct.codpro,
-            ct.dv,
-            'ABC - CD JUIZ DE FORA' AS 'fornecedor',
-            TRIM(pro.codinterno) AS 'referencia',
-            pro.codpro AS 'codProFabricante',
-            'PRONTA ENTREGA' AS 'disponibilidade',
-            0 AS 'prazo',
-            TRIM(CONCAT((SELECT (quant - qtdereserv) FROM itemfilest WHERE filial = '10' AND codpro = pro.codpro ), '')) AS 'quantidade',
-            null as 'numeroPedido',
-            null as 'quantidadeRecebida',
-            null as 'dataPrevisaoRecebimento'
-        FROM
-                CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion) AS ct
-        INNER JOIN produtocad pro on pro.codpro = ct.codpro and pro.dv = ct.dv 
-        INNER JOIN complementoproduto cmp ON pro.codpro = cmp.codpro
-        INNER JOIN fornececad fnd ON pro.codfor = fnd.oid
-        INNER JOIN item ite ON pro.disponibilidade = ite.oid
-        WHERE
-                (SELECT (quant - qtdereserv) FROM itemfilest WHERE filial = '10' AND codpro = pro.codpro) > 0
-        UNION ALL
-        SELECT
-            ct.codpro,
-            ct.dv,
-            'ABC - CAMINHÕES' AS 'fornecedor',
-            TRIM(CONCAT(pro.codinterno,'')) AS 'referencia',
-            null AS 'codProFabricante',
-            'EM TRANSITO' AS 'disponibilidade',
-            0 AS 'prazo',
-            TRIM(CONCAT(i.quant,'')) AS 'quantidade',
-            TRIM(CONCAT(i.numped,'')) AS 'numeroPedido',
-            TRIM(CONCAT(i.quantrec,'')) AS 'quantidadeRecebida',
-            i.dtprevrec AS 'dataPrevisaoRecebimento'
-        FROM CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion2) AS ct
-        INNER JOIN produtocad pro on pro.codpro = ct.codpro and pro.dv = ct.dv 
-        INNER JOIN itemforcad i ON i.codpro = pro.codpro
-        WHERE
-            i.filial='10'
-            and i.quantrec <> i.quant", ['lastVersion' => $lastVersion, 'lastVersion2' => $lastVersion]);
+                    pro.codpro,
+                    pro.dv,
+                    TRIM(pro.codinterno) AS 'referencia',
+                    TRIM(CONCAT((i.quant - i.qtdereserv), '')) AS 'quantidade',
+                    i.filial 
+                FROM
+                    CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion) AS ct
+                INNER JOIN produtocad pro ON pro.codpro = ct.codpro AND pro.dv = ct.dv 
+                INNER JOIN itemfilest i ON i.codpro = pro.codpro
+                WHERE (i.quant - i.qtdereserv) > 0", ['lastVersion' => $lastVersion]);
         return json_decode(json_encode($dados), true);
     }
 
