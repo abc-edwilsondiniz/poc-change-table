@@ -13,34 +13,49 @@ return new class extends Migration {
      */
     public function up() {
         Schema::create('produto', function (Blueprint $table) {
-            $table->id();
-            $table->integer('codpro');
-            $table->integer('codpro-CT');
-            $table->string('dv');
-            $table->string('referencia');
-            $table->string('ncm');
-            $table->string('modelo');
-            $table->string('venda_minima');
-            $table->string('codprofabricante');
-            $table->string('un1');
-            $table->string('id_categoria');
-            $table->string('nome_original');
-            $table->integer('id_fornecedor');
-            $table->integer('preco_tabela');
-            $table->string('altura');
-            $table->string('largura');
-            $table->string('peso');
-            $table->string('comprimento');
-            $table->string('custo_atual');
-            $table->string('custo_ult_pesq');
-            $table->string('qtd_min_compra');
-            $table->string('ean');
-            $table->string('fornecedor');
-            $table->string('raz_social');
-            $table->timestamps();
-            //unique
-            $table->unique(['codpro', 'dv', 'fornecedor']);
-        });
+                        $table->id()->unique();
+                        $table->integer('codpro');
+                        $table->integer('codpro_tb_ct');
+                        $table->string('dv');
+                        $table->string('operation')->nullable(true);
+                        $table->string('referencia', 17)->nullable(true);
+                        $table->string('nome_original', 100)->nullable(true);
+                        $table->string('ncm', 14)->nullable(true);
+                        $table->string('modelo', 254);
+                        $table->integer('venda_minima');
+                        $table->string('codpro_fabricante', 25);
+                        $table->string('un1', 3);
+                        $table->string('un2', 3);
+                        $table->decimal('faconv', 9);
+                        $table->integer('cod_disponibilidade');
+                        $table->string('disponibilidade', 254)->nullable(true);
+                        $table->string('classe', 14);
+                        $table->string('cod_classe', 14);
+                        $table->string('n1', 25);
+                        $table->string('n2', 25);
+                        $table->string('n3', 25);
+                        $table->integer('id_fornecedor');
+                        $table->string('fornecedor')->nullable(true);
+                        $table->string('estado_fornecedor_origem', 254)->nullable(true);
+                        $table->decimal('altura', 9);
+                        $table->decimal('largura', 9);
+                        $table->decimal('peso', 8);
+                        $table->decimal('comprimento', 9);
+                        $table->decimal('custo_atual', 8);
+                        $table->decimal('icms_ultima_compra', 8);
+                        $table->string('data_ult_compra')->nullable(true);
+                        $table->decimal('custo_ult_pesq', 13)->nullable(true);
+                        $table->decimal('qtd_min_compra', 9);
+                        $table->string('ean', 254);
+                        $table->string('cf', 4);
+                        $table->string('codigo_mens', 2);
+                        $table->string('tributacao_mg')->nullable(true);
+                        $table->string('origem', 1)->nullable(true);
+                        $table->string('ref_end', 17);
+                        $table->timestamps();
+                        //unique
+                        $table->unique(['codpro', 'dv']);
+                    });
     }
 
     /**

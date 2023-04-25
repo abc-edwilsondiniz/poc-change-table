@@ -11,7 +11,7 @@ class ProdutoService {
     /**
      * retorna o ultimo valor q ainda não foi executado em busca dos trackings
      */
-    public static function getLastVersionControle() {
+    public static function getLastVersionProdutoControle() {
         $lastVersion = Configuracoes::where('nome', 'change_tracking_produto')->first();
 
         //ainda não tem versao na tabela de controle
@@ -23,6 +23,23 @@ class ProdutoService {
         return $lastVersion->valor;
     }
 
+
+    /**
+     * retorna o ultimo valor q ainda não foi executado em busca dos trackings
+     */
+    public static function getLastVersionProdutoComplementoControle() {
+        $lastVersion = Configuracoes::where('nome', 'change_tracking_produto_complemento')->first();
+
+        //ainda não tem versao na tabela de controle
+        if (empty($lastVersion)) {
+            $version = DB::connection('sqlsrv_ERP')->selectOne('select CHANGE_TRACKING_CURRENT_VERSION() as version');
+            return $version->version;
+        }
+
+        return $lastVersion->valor;
+    }
+
+
     /**
      * retorna o ultimo tracking para a proximo controle interno da execuçao
      */
@@ -33,6 +50,23 @@ class ProdutoService {
     }
 
     /**
+     * atualiza o valor na tabela de controle de produtos
+     */
+    public static function updateLastTrackingProdutoTable($version) {
+
+        //atualiza a ultima versao na tabela de controle
+        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_produto')->first();
+
+        if (empty($LastVersionTable)) {
+            $LastVersionTable = new Configuracoes();
+            $LastVersionTable->nome = 'change_tracking_produto';
+        }
+
+        $LastVersionTable->valor = $version;
+        $LastVersionTable->save();
+    }
+
+     /**
      * atualiza o valor na tabela de controle
      */
     public static function updateLastTrackingTable($version) {
@@ -57,27 +91,43 @@ class ProdutoService {
         Produto::upsert($dados, ['codpro', 'dv', 'fornecedor'],
                 [
                     "codpro",
-                    "codpro-CT",
+                    "codpro_tb_ct",
                     "dv",
+                    "operation",
                     "referencia",
+                    "nome_original",
                     "ncm",
                     "modelo",
                     "venda_minima",
+                    "codpro_fabricante",
                     "un1",
-                    "id_categoria",
-                    "nome_original",
+                    "un2",
+                    "faconv",
+                    "cod_disponibilidade",
+                    "disponibilidade",
+                    "classe",
+                    "cod_classe",
+                    "n1",
+                    "n2",
+                    "n3",
                     "id_fornecedor",
-                    "preco_tabela",
+                    "fornecedor",
+                    "estado_fornecedor_origem",
                     "altura",
                     "largura",
                     "peso",
                     "comprimento",
                     "custo_atual",
+                    "icms_ultima_compra",
+                    "data_ult_compra",
                     "custo_ult_pesq",
                     "qtd_min_compra",
                     "ean",
-                    "fornecedor",
-                    "raz_social",
+                    "cf",
+                    "codigo_mens",
+                    "tributacao_mg",
+                    "origem",
+                    "ref_end",
                 ]);
     }
 
@@ -88,35 +138,72 @@ class ProdutoService {
 
         $dados = DB::connection('sqlsrv_ERP')->select(
                     "SELECT
-                        Pro.Codpro                                    AS 'codpro',
-                        ct.codpro									  AS 'codpro-CT',
-                        ct.dv										  AS 'dv',
-                        TRIM(CONCAT(Pro.codinterno,''))               AS 'referencia',
-                        TRIM(pro.codigoncm)                           AS 'ncm',
-                        TRIM(Pro.modelo)                              AS 'modelo',
-                        CONCAT(cmp.vendaminima, '')                   AS 'venda_minima',
-                        CONCAT(cmp.CODPROFABRICANTE,'')               AS 'codprofabricante',
-                        Pro.unid1                                     AS 'un1',
-                        SUBSTRING(pro.clasprod,1,6)                   AS 'id_categoria',
-                        cmp.descricaolonga                            AS 'nome_original',
-                        pro.codfor                                    AS 'id_fornecedor',
-                        0                                             AS 'preco_tabela',
-                        TRIM(CONCAT(COALESCE(cmp.alturacm,0),''))     AS 'altura',
-                        TRIM(CONCAT(COALESCE(cmp.larguracm,0),''))    AS 'largura',
-                        TRIM(CONCAT(COALESCE(pro.pesounit,0),''))     AS 'peso',
-                        TRIM(CONCAT(COALESCE(cmp.comprimentocm,0),''))AS 'comprimento',
-                        CONCAT(pro.precocomp,'')                      AS 'custo_atual',
-                        CONCAT((ISNULL((SELECT top 1 valorcusto FROM pesquisa WHERE codigoexterno = pro.codpro ORDER BY criadoem DESC),0)),'') AS 'custo_ult_pesq',
-                        CONCAT((SELECT qtmincompr FROM itemfilest WHERE filial = '10' AND codpro = pro.codpro), '') AS 'qtd_min_compra',
-                        TRIM(CONCAT((SELECT top 1 referencia FROM prodrefcad WHERE codpro = pro.codpro AND CodigoBarraEAN IS NOT NULL AND CodigoBarraEAN NOT IN ('')), '')) AS 'ean',
+                        Pro.Codpro AS 'codpro',
+                        ct.codpro AS 'codpro_tb_ct',
+                        ct.dv AS 'dv',
+                        ct.SYS_CHANGE_OPERATION AS 'operation',
+                        TRIM(CONCAT(Pro.codinterno, '')) AS 'referencia',
+                        cmp.descricaolonga AS 'nome_original',
+                        TRIM(pro.codigoncm) AS 'ncm',
+                        TRIM(Pro.modelo) AS 'modelo',
+                        cmp.vendaminima AS 'venda_minima',
+                        CONCAT(cmp.CODPROFABRICANTE, '') AS 'codpro_fabricante',
+                        Pro.unid1 AS 'un1',
+                        Pro.unid2 AS 'un2',
+                        Pro.faconv AS 'faconv',
+                        pro.disponibilidade AS 'cod_disponibilidade',
+                        (SELECT abc.nome FROM abc_disponibilidade abc WHERE abc.disponibilidade = pro.disponibilidade) AS disponibilidade,
+                        SUBSTRING(pro.clasprod, 1, 6) AS 'classe',
+                        SUBSTRING(pro.clasprod, 1, 6) AS 'cod_classe',
+                        (SELECT pcla.descr FROM classifcad pcla WHERE substring(pro.clasprod, 1, 2) = pcla.clasprod ) AS n1,
+                        (SELECT pcla.descr FROM classifcad pcla WHERE substring(pro.clasprod, 1, 4) = pcla.clasprod ) AS n2,
+                        (SELECT pcla.descr FROM classifcad pcla WHERE substring(pro.clasprod, 1, 6) = pcla.clasprod ) AS n3,
+                        pro.codfor AS 'id_fornecedor',
                         fnd.NOME AS 'fornecedor',
-                        fnd.RAZSOC AS 'raz_social'
+                        (SELECT TOP 1 prov.sigla FROM provincia prov, endereco_r en, cidade_r d WHERE pro.codfor = en.ritem AND en.rcidade = d.oid AND d.rprovincia = prov.oid) AS 'estado_fornecedor_origem',
+                        cmp.alturacm AS 'altura',
+                        cmp.larguracm AS 'largura',
+                        pro.pesounit AS 'peso',
+                        cmp.comprimentocm AS 'comprimento',
+                        pro.precocomp AS 'custo_atual',
+                        pro.icmultcomp AS 'icms_ultima_compra',
+                        pro.dtultcomp AS 'data_ult_compra',
+                        (ISNULL((SELECT top 1 valorcusto
+                                    FROM pesquisa
+                                    WHERE codigoexterno = pro.codpro
+                                    ORDER BY criadoem DESC), 0)) AS 'custo_ult_pesq',
+                        (SELECT qtmincompr
+                            FROM itemfilest
+                            WHERE filial = '10'
+                            AND codpro = pro.codpro) AS 'qtd_min_compra',
+                        TRIM(CONCAT((SELECT top 1 referencia
+                                        FROM prodrefcad
+                                        WHERE codpro = pro.codpro
+                                        AND CodigoBarraEAN IS NOT NULL
+                                        AND CodigoBarraEAN NOT IN ('')), '')) AS 'ean',
+                        pro.cf as 'cf',
+                        pro.cm AS 'codigo_mens',
+                        CASE tab.usomens
+                            WHEN 'A' THEN 'ST'
+                            WHEN 'T' THEN 'D/C'
+                            WHEN 'B' THEN 'D/C_BASE_REDUZIDA'
+                            WHEN 'I' THEN 'ISENTO' ------- ISENTO -----
+                        END AS 'tributacao_mg',
+                        CASE
+                            WHEN pro.origem IN ('N',
+                                                'M',
+                                                'L') THEN 'Nacional'
+                            WHEN pro.origem IN ('I',
+                                                'G',
+                                                'H') THEN 'Importado'
+                        END AS 'origem',
+                        RIGHT(TRIM(pro.codinterno), 1) AS 'ref_end'
                     FROM CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion) AS ct
                     INNER JOIN produtocad pro on pro.codpro = ct.codpro and pro.dv = ct.dv
-                    INNER JOIN complementoproduto    cmp ON pro.codpro = cmp.codpro
-                    INNER JOIN fornececad            fnd ON pro.codfor = fnd.oid
-                    INNER JOIN item                  ite ON pro.disponibilidade = ite.oid
-                    LEFT JOIN  SKU_PRODUTO_ECOMMERCE sku ON sku.REFERENCIA=pro.codinterno"
+                    INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro
+                    INNER JOIN fornececad fnd ON pro.codfor = fnd.oid
+                    INNER JOIN item ite ON pro.disponibilidade = ite.oid
+                    LEFT JOIN tabmenscad tab ON tab.cm = pro.cm"
                     ,['lastVersion' => $lastVersion]);
 
         return json_decode(json_encode($dados), true);
