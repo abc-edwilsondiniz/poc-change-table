@@ -16,9 +16,10 @@ return new class extends Migration {
             $table->id();
             $table->integer('codpro');
             $table->string('dv');
-            $table->string('referencia');
-            $table->decimal('quantidade', 8, 3);
             $table->smallInteger('filial');
+            $table->string('referencia');
+            $table->decimal('estoque_atual', 8, 3)->nullable(true);
+            $table->decimal('estoque_futuro', 8, 3)->nullable(true);
             $table->timestamps();
 
             //unique
