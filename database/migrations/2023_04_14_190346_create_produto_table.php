@@ -34,7 +34,7 @@ return new class extends Migration {
                         $table->string('n1', 25)->nullable(true);
                         $table->string('n2', 25)->nullable(true);
                         $table->string('n3', 25)->nullable(true);
-                        $table->integer('id_fornecedor');
+                        $table->integer('id_fornecedor')->nullable(true);
                         $table->string('fornecedor')->nullable(true);
                         $table->string('estado_fornecedor_origem', 254)->nullable(true);
                         $table->decimal('altura', 9)->nullable(true);

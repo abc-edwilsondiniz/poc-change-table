@@ -135,37 +135,17 @@ class ProdutoService {
      */
     public static function flushProdutoComplemento($dados) {
 
-        Produto::upsert($dados, ['codpro', 'dv'],
+        Produto::upsert($dados, ['codpro'],
                 [
                     "codpro",
                     "codpro_tb_ct",
-                    "dv",
                     "operation",
                     "nome_original",
-                    "modelo",
                     "venda_minima",
                     "codpro_fabricante",
-                    "un1",
-                    "un2",
-                    "faconv",
-                    "cod_disponibilidade",
-                    "classe",
-                    "cod_classe",
-                    "n1",
-                    "n2",
-                    "n3",
-                    "id_fornecedor",
                     "altura",
                     "largura",
-                    "peso",
                     "comprimento",
-                    "custo_atual",
-                    "icms_ultima_compra",
-                    "qtd_min_compra",
-                    "ean",
-                    "cf",
-                    "codigo_mens",
-                    "ref_end",
                     "origem_traking",
                 ]);
     }
@@ -256,19 +236,19 @@ class ProdutoService {
 
         $dados = DB::connection('sqlsrv_ERP')->select(
                     "SELECT
-                    pro.Codpro AS 'codpro',
-                    ct.codpro AS 'codpro_tb_ct',
-                    ct.SYS_CHANGE_OPERATION AS 'operation',
-                    cmp.descricaolonga AS 'nome_original',
-                    cmp.vendaminima AS 'venda_minima',
-                    CONCAT(cmp.CODPROFABRICANTE, '') AS 'codpro_fabricante',
-                    cmp.alturacm AS 'altura',
-                    cmp.larguracm AS 'largura',
-                    cmp.comprimentocm AS 'comprimento',
-                    'COMPLEMENTOPRODUTO' AS 'origem_traking'
-                FROM CHANGETABLE (CHANGES [COMPLEMENTOPRODUTO], :lastVersion) AS ct
-                INNER JOIN produtocad pro on pro.codpro = ct.codpro
-                INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro"
+                        pro.Codpro AS 'codpro',
+                        ct.codpro AS 'codpro_tb_ct',
+                        ct.SYS_CHANGE_OPERATION AS 'operation',
+                        cmp.descricaolonga AS 'nome_original',
+                        cmp.vendaminima AS 'venda_minima',
+                        CONCAT(cmp.CODPROFABRICANTE, '') AS 'codpro_fabricante',
+                        cmp.alturacm AS 'altura',
+                        cmp.larguracm AS 'largura',
+                        cmp.comprimentocm AS 'comprimento',
+                        'COMPLEMENTOPRODUTO' AS 'origem_traking'
+                    FROM CHANGETABLE (CHANGES [COMPLEMENTOPRODUTO], :lastVersion) AS ct
+                    INNER JOIN produtocad pro on pro.codpro = ct.codpro
+                    INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro"
                     ,['lastVersion' => $lastVersionProdutoComplemento]);
 
         return json_decode(json_encode($dados), true);
