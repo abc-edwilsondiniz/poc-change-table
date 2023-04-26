@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrackingController;
-use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\ProdutoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +14,10 @@ use App\Http\Controllers\EstoqueController;
 | contains the "web" middleware group. Now create something great!
 |
 */
- 
+
 Route::get('/tracking', [TrackingController::class, 'index']);
 Route::get('/tracking-estoque', [EstoqueController::class, 'estoque']);
+Route::get('/tracking-produto', [ProdutoController::class, 'produto']);
 
 Route::get('/', function () {
     return view('welcome');
