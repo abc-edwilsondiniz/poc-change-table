@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\EstoqueController;
 
@@ -16,7 +16,7 @@ use App\Http\Controllers\EstoqueController;
 |
 */
 
-Route::get('/tracking', [TrackingController::class, 'index']);
+Route::get('/tracking-pedido', [PedidoController::class, 'index']);
 Route::get('/tracking-estoque', [EstoqueController::class, 'estoque']);
 Route::get('/tracking-produto', [ProdutoController::class, 'produto']);
 
