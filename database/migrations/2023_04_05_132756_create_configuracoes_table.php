@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('configuracoes', function (Blueprint $table) {
+        Schema::create('configuracoes', function (Blueprint $table) {
             $table->id();
             $table->string('nome')->unique();
             $table->bigInteger('valor');
