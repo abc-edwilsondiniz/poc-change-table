@@ -12,7 +12,7 @@ return new class extends Migration {
      * @return void
      */
     public function up() {
-        Schema::create('produto', function (Blueprint $table) {
+        Schema::create('produtos', function (Blueprint $table) {
                         $table->id()->unique();
                         $table->integer('codpro');
                         $table->integer('codpro_tb_ct')->nullable(true);
@@ -65,6 +65,6 @@ return new class extends Migration {
      * @return void
      */
     public function down() {
-        Schema::dropIfExists('produto');
+        Schema::dropIfExists('produtos');
     }
 };

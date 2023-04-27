@@ -16,6 +16,6 @@ class Produto extends Model {
      *
      * @var string
      */
-    protected $table = 'produto';
+    protected $table = 'produtos';
 
 }
