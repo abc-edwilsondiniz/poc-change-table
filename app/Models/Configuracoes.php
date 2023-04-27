@@ -9,8 +9,6 @@ class Configuracoes extends Model {
 
     use HasFactory;
     
-    protected $connection = 'mysql';
-
     /**
      * The table associated with the model.
      *
