@@ -86,10 +86,9 @@ class ProdutoService {
      */
     public static function flushProduto($dados) {
 
-        Produto::upsert($dados, ['codpro', 'dv', 'fornecedor'],
+        Produto::upsert($dados, ['codpro', 'dv', 'id_fornecedor'],
                 [
                     "codpro",
-                    "codpro_tb_ct",
                     "dv",
                     "operation",
                     "referencia",
@@ -125,8 +124,7 @@ class ProdutoService {
                     "codigo_mens",
                     "tributacao_mg",
                     "origem",
-                    "ref_end",
-                    "origem_traking",
+                    "ref_end"
                 ]);
     }
 
@@ -135,18 +133,18 @@ class ProdutoService {
      */
     public static function flushProdutoComplemento($dados) {
 
-        Produto::upsert($dados, ['codpro'],
+        Produto::upsert($dados, ['codpro', 'dv', 'id_fornecedor'],
                 [
                     "codpro",
-                    "codpro_tb_ct",
+                    "dv",
+                    "id_fornecedor",
                     "operation",
                     "nome_original",
                     "venda_minima",
                     "codpro_fabricante",
                     "altura",
                     "largura",
-                    "comprimento",
-                    "origem_traking",
+                    "comprimento"
                 ]);
     }
 
@@ -158,7 +156,6 @@ class ProdutoService {
         $dados = DB::connection('sqlsrv_ERP')->select(
                     "SELECT
                         Pro.Codpro AS 'codpro',
-                        ct.codpro AS 'codpro_tb_ct',
                         ct.dv AS 'dv',
                         ct.SYS_CHANGE_OPERATION AS 'operation',
                         TRIM(CONCAT(Pro.codinterno, '')) AS 'referencia',
@@ -216,8 +213,7 @@ class ProdutoService {
                                                 'G',
                                                 'H') THEN 'Importado'
                         END AS 'origem',
-                        RIGHT(TRIM(pro.codinterno), 1) AS 'ref_end',
-                        'PRODUTOCAD' AS 'origem_traking'
+                        RIGHT(TRIM(pro.codinterno), 1) AS 'ref_end'
                     FROM CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion) AS ct
                     INNER JOIN produtocad pro on pro.codpro = ct.codpro and pro.dv = ct.dv
                     INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro
@@ -237,15 +233,15 @@ class ProdutoService {
         $dados = DB::connection('sqlsrv_ERP')->select(
                     "SELECT
                         pro.Codpro AS 'codpro',
-                        ct.codpro AS 'codpro_tb_ct',
+                        pro.dv,
+                        pro.codfor AS 'id_fornecedor',
                         ct.SYS_CHANGE_OPERATION AS 'operation',
                         cmp.descricaolonga AS 'nome_original',
                         cmp.vendaminima AS 'venda_minima',
                         CONCAT(cmp.CODPROFABRICANTE, '') AS 'codpro_fabricante',
                         cmp.alturacm AS 'altura',
                         cmp.larguracm AS 'largura',
-                        cmp.comprimentocm AS 'comprimento',
-                        'COMPLEMENTOPRODUTO' AS 'origem_traking'
+                        cmp.comprimentocm AS 'comprimento'
                     FROM CHANGETABLE (CHANGES [COMPLEMENTOPRODUTO], :lastVersion) AS ct
                     INNER JOIN produtocad pro on pro.codpro = ct.codpro
                     INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro"

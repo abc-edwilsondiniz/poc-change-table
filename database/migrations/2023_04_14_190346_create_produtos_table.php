@@ -15,8 +15,9 @@ return new class extends Migration {
         Schema::create('produtos', function (Blueprint $table) {
                         $table->id()->unique();
                         $table->integer('codpro');
-                        $table->integer('codpro_tb_ct')->nullable(true);
                         $table->string('dv')->nullable(true);
+                        $table->integer('id_fornecedor')->nullable(true);
+                        
                         $table->string('operation')->nullable(true);
                         $table->string('referencia', 17)->nullable(true);
                         $table->string('nome_original', 100)->nullable(true);
@@ -34,7 +35,6 @@ return new class extends Migration {
                         $table->string('n1', 25)->nullable(true);
                         $table->string('n2', 25)->nullable(true);
                         $table->string('n3', 25)->nullable(true);
-                        $table->integer('id_fornecedor')->nullable(true);
                         $table->string('fornecedor')->nullable(true);
                         $table->string('estado_fornecedor_origem', 254)->nullable(true);
                         $table->decimal('altura', 9)->nullable(true);
@@ -52,10 +52,9 @@ return new class extends Migration {
                         $table->string('tributacao_mg')->nullable(true);
                         $table->string('origem', 1)->nullable(true);
                         $table->string('ref_end', 17)->nullable(true);
-                        $table->string('origem_traking', 254)->nullable(true);
                         $table->timestamps();
                         //unique
-                        $table->unique(['codpro', 'dv']);
+                        $table->unique(['codpro', 'dv', 'id_fornecedor']);
                     });
     }
 

@@ -20,7 +20,6 @@ class ProdutoController extends Controller {
             //busco as ultimas alteraçẽos no ERP
             $dadosProdutoTrackingERP = ProdutoService::getLastChagingTrackingProduto($lastVersionProduto);
 
-            // dd($dadosProdutoTrackingERP);
             $chunks = array_chunk($dadosProdutoTrackingERP, 500); // limita a carga da consulta em 500 registros por vez
             foreach ($chunks as $chunk) {
                 //add/update na tabela "espelho produto"
