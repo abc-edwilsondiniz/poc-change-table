@@ -14,6 +14,6 @@ class Estoque extends Model {
      *
      * @var string
      */
-    protected $table = 'estoque';
+    protected $table = 'estoques';
 
 }

@@ -12,7 +12,7 @@ return new class extends Migration {
      * @return void
      */
     public function up() {
-        Schema::create('pediclicad', function (Blueprint $table) {
+        Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('numped');
             $table->string('filial', 2);
@@ -148,6 +148,6 @@ return new class extends Migration {
      * @return void
      */
     public function down() {
-        Schema::dropIfExists('pediclicad');
+        Schema::dropIfExists('pedidos');
     }
 };

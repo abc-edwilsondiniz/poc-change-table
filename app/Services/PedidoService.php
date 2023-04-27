@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Models\Configuracoes;
-use App\Models\PediClicad;
+use App\Models\Pedidos;
 use Illuminate\Support\Facades\DB;
 
-class TrackingService {
+class PedidoService {
 
     /**
      * retorna o ultimo valor q ainda não foi executado em busca dos trackings
      */
     public static function getLastVersionControle() {
-        $lastVersion = Configuracoes::where('nome', 'change_tracking_version')->first();
+        $lastVersion = Configuracoes::where('nome', 'change_tracking_pedido')->first();
 
         //ainda não tem versao na tabela de controle
         if (empty($lastVersion)) {
@@ -38,11 +38,11 @@ class TrackingService {
     public static function updateLastTrackingTable($version) {
 
         //atualiza a ultima versao na tabela de controle
-        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_version')->first();
+        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_pedido')->first();
 
         if (empty($LastVersionTable)) {
             $LastVersionTable = new Configuracoes();
-            $LastVersionTable->nome = 'change_tracking_version';
+            $LastVersionTable->nome = 'change_tracking_pedido';
         }
 
         $LastVersionTable->valor = $version;
@@ -68,7 +68,7 @@ class TrackingService {
      */
     public static function flushPediCliCad($dados) {
 
-        PediClicad::upsert($dados, ['numped', 'filial'], ["numped",
+        Pedidos::upsert($dados, ['numped', 'filial'], ["numped",
             "codclie",
             "numorc",
             "codvend",
