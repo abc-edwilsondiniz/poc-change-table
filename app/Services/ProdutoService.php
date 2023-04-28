@@ -19,7 +19,6 @@ class ProdutoService {
             $version = DB::connection('sqlsrv_ERP')->selectOne('select CHANGE_TRACKING_CURRENT_VERSION() as version');
             return $version->version;
         }
-
         return $lastVersion->valor;
     }
 
@@ -35,7 +34,6 @@ class ProdutoService {
             $version = DB::connection('sqlsrv_ERP')->selectOne('select CHANGE_TRACKING_CURRENT_VERSION() as version');
             return $version->version;
         }
-
         return $lastVersion->valor;
     }
 
@@ -69,14 +67,14 @@ class ProdutoService {
      /**
      * atualiza o valor na tabela de controle
      */
-    public static function updateLastTrackingTable($version) {
+    public static function updateLastTrackingProdutoComplementoTable($version) {
 
         //atualiza a ultima versao na tabela de controle
-        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_produto')->first();
+        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_produto_complemento')->first();
 
         if (empty($LastVersionTable)) {
             $LastVersionTable = new Configuracoes();
-            $LastVersionTable->nome = 'change_tracking_produto';
+            $LastVersionTable->nome = 'change_tracking_produto_complemento';
         }
 
         $LastVersionTable->valor = $version;
@@ -84,14 +82,13 @@ class ProdutoService {
     }
 
     /**
-     * inserir/update os dados de estoque
+     * inserir/update os dados de produto
      */
     public static function flushProduto($dados) {
 
-        Produto::upsert($dados, ['codpro', 'dv', 'fornecedor'],
+        Produto::upsert($dados, ['codpro', 'dv', 'id_fornecedor'],
                 [
                     "codpro",
-                    "codpro_tb_ct",
                     "dv",
                     "operation",
                     "referencia",
@@ -127,19 +124,38 @@ class ProdutoService {
                     "codigo_mens",
                     "tributacao_mg",
                     "origem",
-                    "ref_end",
+                    "ref_end"
                 ]);
     }
 
     /**
-     * busca as ultimas modificações da tabela no ERP
+     * inserir/update os dados de produto
      */
-    public static function getLastChagingTrackingProduto($lastVersion) {
+    public static function flushProdutoComplemento($dados) {
+
+        Produto::upsert($dados, ['codpro', 'dv', 'id_fornecedor'],
+                [
+                    "codpro",
+                    "dv",
+                    "id_fornecedor",
+                    "operation",
+                    "nome_original",
+                    "venda_minima",
+                    "codpro_fabricante",
+                    "altura",
+                    "largura",
+                    "comprimento"
+                ]);
+    }
+
+    /**
+     * busca as ultimas modificações do produto da tabela no ERP
+     */
+    public static function getLastChagingTrackingProduto($lastVersionProduto) {
 
         $dados = DB::connection('sqlsrv_ERP')->select(
                     "SELECT
                         Pro.Codpro AS 'codpro',
-                        ct.codpro AS 'codpro_tb_ct',
                         ct.dv AS 'dv',
                         ct.SYS_CHANGE_OPERATION AS 'operation',
                         TRIM(CONCAT(Pro.codinterno, '')) AS 'referencia',
@@ -204,7 +220,32 @@ class ProdutoService {
                     INNER JOIN fornececad fnd ON pro.codfor = fnd.oid
                     INNER JOIN item ite ON pro.disponibilidade = ite.oid
                     LEFT JOIN tabmenscad tab ON tab.cm = pro.cm"
-                    ,['lastVersion' => $lastVersion]);
+                    ,['lastVersion' => $lastVersionProduto]);
+
+        return json_decode(json_encode($dados), true);
+    }
+
+    /**
+     * busca as ultimas modificações de complementos do produto da tabela no ERP
+     */
+    public static function getLastChagingTrackingProdutoComplemento($lastVersionProdutoComplemento) {
+
+        $dados = DB::connection('sqlsrv_ERP')->select(
+                    "SELECT
+                        pro.Codpro AS 'codpro',
+                        pro.dv,
+                        pro.codfor AS 'id_fornecedor',
+                        ct.SYS_CHANGE_OPERATION AS 'operation',
+                        cmp.descricaolonga AS 'nome_original',
+                        cmp.vendaminima AS 'venda_minima',
+                        CONCAT(cmp.CODPROFABRICANTE, '') AS 'codpro_fabricante',
+                        cmp.alturacm AS 'altura',
+                        cmp.larguracm AS 'largura',
+                        cmp.comprimentocm AS 'comprimento'
+                    FROM CHANGETABLE (CHANGES [COMPLEMENTOPRODUTO], :lastVersion) AS ct
+                    INNER JOIN produtocad pro on pro.codpro = ct.codpro
+                    INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro"
+                    ,['lastVersion' => $lastVersionProdutoComplemento]);
 
         return json_decode(json_encode($dados), true);
     }
