@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PedidoService;
+use App\Services\ClienteService;
 
 class PedidoController extends Controller {
 
@@ -18,7 +19,25 @@ class PedidoController extends Controller {
             $pedidosTrackingERP = PedidoService::getLastChagingTrackingERP($lastVersion);
 
             $chunks = array_chunk($pedidosTrackingERP, 500);
+
+            $clientes = [];
             foreach ($chunks as $chunk) {
+                foreach ($chunk as $key => $value) {
+                    $clientes[$key] = [
+                        'cpf_cnpj' => trim($value['cgccli']),
+                        'nome' => trim($value['nome_cliente']),
+                        'razao_social' => trim($value['razaocli']),
+                        'email' => trim($value['email_cliente']),
+                        'celular' => trim($value['telecli']),
+                    ];
+
+                    //remover os campos pra nao dar erro no flush de pedido
+                    unset($chunk[$key]['nome_cliente']);
+                    unset($chunk[$key]['email_cliente']);
+                }
+
+                ClienteService::flushClientes($clientes);
+
                 //add/update na tabela "espelho"
                 PedidoService::flushPediCliCad($chunk);
             }

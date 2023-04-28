@@ -56,10 +56,15 @@ class PedidoService {
 
         $dados = DB::connection('sqlsrv_ERP')->select(
                 'SELECT
-                        p.*
-                    FROM CHANGETABLE (CHANGES [PEDICLICAD], :lastVersion) AS c
-                    JOIN PEDICLICAD p on p.numped = c.numped
-                    ORDER BY SYS_CHANGE_VERSION', ['lastVersion' => $lastVersion]);
+                p.*,
+                cli.nome AS nome_cliente,
+                lower((select top 1 co.VALOR 
+                          from COMUNICACAO_V co 
+                          where co.RITEM = cli.oid and 
+                               co.RTIPO = :rtipo)) as email_cliente
+                FROM CHANGETABLE (CHANGES [PEDICLICAD], :lastVersion) AS c
+                JOIN PEDICLICAD p on p.numped = c.numped
+                JOIN clientecad cli on cli.oid = p.codclie', ['lastVersion' => $lastVersion, 'rtipo' => "32979"]);
         return json_decode(json_encode($dados), true);
     }
 

@@ -17,9 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string('cpf_cnpj', 18);
             $table->string('nome', 150);
-            $table->string('razao_social', 150);
-            $table->string('email', 150);
-            $table->string('celular', 14);
+            $table->string('razao_social', 150)->nullable(true);
+            $table->string('email', 150)->nullable(true);
+            $table->string('celular', 20)->nullable(true);
             $table->timestamps();
             //unique
             $table->unique(['cpf_cnpj']);
