@@ -14,6 +14,7 @@ class Produto extends Model {
      *
      * @var string
      */
+    protected $connection = 'mysql';
     protected $table = 'produtos';
 
 }
