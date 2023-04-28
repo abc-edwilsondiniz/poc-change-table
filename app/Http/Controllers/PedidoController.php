@@ -24,7 +24,7 @@ class PedidoController extends Controller {
             foreach ($chunks as $chunk) {
                 foreach ($chunk as $key => $value) {
                     $clientes[$key] = [
-                        'cpf_cnpj' => trim($value['cgccli']),
+                        'cpf_cnpj' => trim($value['cpf_cnpj']),
                         'nome' => trim($value['nome_cliente']),
                         'razao_social' => trim($value['razaocli']),
                         'email' => trim($value['email_cliente']),
@@ -34,6 +34,8 @@ class PedidoController extends Controller {
                     //remover os campos pra nao dar erro no flush de pedido
                     unset($chunk[$key]['nome_cliente']);
                     unset($chunk[$key]['email_cliente']);
+                    unset($chunk[$key]['razaocli']);
+                    unset($chunk[$key]['telecli']);
                 }
 
                 ClienteService::flushClientes($clientes);

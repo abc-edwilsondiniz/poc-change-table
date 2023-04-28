@@ -38,12 +38,11 @@ return new class extends Migration {
             $table->decimal('valfrete');
             $table->decimal('perseguro');
             $table->decimal('valseguro');
-            $table->string('razaocli', 254)->nullable(true);
             $table->string('endercli', 254)->nullable(true);
             $table->string('bairrcli', 254)->nullable(true);
             $table->string('cidadcli', 254)->nullable(true);
             $table->string('cepcli', 8)->nullable(true);
-            $table->string('cgccli', 18)->nullable(true);
+            $table->string('cpf_cnpj', 18)->nullable(true);
             $table->string('inscli', 17)->nullable(true);
             $table->string('estcli', 2)->nullable(true);
             $table->string('tipnota', 1)->nullable(true);
@@ -68,7 +67,6 @@ return new class extends Migration {
             $table->string('libatra', 5)->nullable(true);
             $table->string('sitven', 1)->nullable(true);
             $table->string('naoaprov', 1)->nullable(true);
-            $table->string('telecli', 50)->nullable(true);
             $table->string('horaped', 4)->nullable(true);
             $table->decimal('freteorc');
             $table->string('numfrete', 10)->nullable(true);
