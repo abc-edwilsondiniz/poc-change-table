@@ -29,6 +29,7 @@ class PedidoController extends Controller {
                         'cpf_cnpj' => trim($value['cpf_cnpj']),
                         'nome' => trim($value['nome_cliente']),
                         'razao_social' => trim($value['razaocli']),
+                        'inscricao_estadual' => trim($value['inscli']),
                         'email' => trim($value['email_cliente']),
                         'celular' => trim($value['telecli']),
                     ];
@@ -49,7 +50,17 @@ class PedidoController extends Controller {
                     unset($chunk[$key]['nome_cliente']);
                     unset($chunk[$key]['email_cliente']);
                     unset($chunk[$key]['razaocli']);
+                    unset($chunk[$key]['inscli']);
                     unset($chunk[$key]['telecli']);
+                    //--
+                    unset($chunk[$key]['endercli']);
+                    unset($chunk[$key]['NumClie']);
+                    unset($chunk[$key]['bairrcli']);
+                    unset($chunk[$key]['cidadcli']);
+                    unset($chunk[$key]['cepcli']);
+                    unset($chunk[$key]['estcli']);
+                    unset($chunk[$key]['COMPLCLI']);
+                    unset($chunk[$key]['contato']);
                 }//FIM FOREACH CHUNCK INTERNO
 
                 /* add/update na tabela "espelho" */
