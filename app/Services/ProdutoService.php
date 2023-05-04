@@ -39,6 +39,20 @@ class ProdutoService {
 
 
     /**
+     * retorna o ultimo valor q ainda não foi executado em busca dos trackings
+     */
+    public static function getLastVersionProdutoPesquisaControle() {
+        $lastVersion = Configuracoes::where('nome', 'change_tracking_produto_pesquisa')->first();
+
+        //ainda não tem versao na tabela de controle
+        if (empty($lastVersion)) {
+            $version = DB::connection('sqlsrv_ERP')->selectOne('select CHANGE_TRACKING_CURRENT_VERSION() as version');
+            return $version->version;
+        }
+        return $lastVersion->valor;
+    }
+
+    /**
      * retorna o ultimo tracking para a proximo controle interno da execuçao
      */
     public static function getLastVersionTrackingTable() {
@@ -80,6 +94,25 @@ class ProdutoService {
         $LastVersionTable->valor = $version;
         $LastVersionTable->save();
     }
+
+
+    /**
+     * atualiza o valor na tabela de controle
+     */
+    public static function updateLastTrackingProdutoPesquisaTable($version) {
+
+        //atualiza a ultima versao na tabela de controle
+        $LastVersionTable = Configuracoes::where('nome', 'change_tracking_produto_pesquisa')->first();
+
+        if (empty($LastVersionTable)) {
+            $LastVersionTable = new Configuracoes();
+            $LastVersionTable->nome = 'change_tracking_produto_pesquisa';
+        }
+
+        $LastVersionTable->valor = $version;
+        $LastVersionTable->save();
+    }
+
 
     /**
      * inserir/update os dados de produto
@@ -148,6 +181,29 @@ class ProdutoService {
                 ]);
     }
 
+/**
+     * inserir/update os dados de produto
+     */
+    public static function flushProdutoPesquisa($dados) {
+
+        Produto::upsert($dados, ['codpro', 'dv', 'oid_pesquisa', 'codigo_externo_pesquisa'],
+                [
+                    "codpro",
+                    "dv",
+                    "cod_interno_produtocad",
+                    "codigo_externo_pesquisa",
+                    "oid_pesquisa",
+                    "operation",
+                    "valor_custo",
+                    "valor_subst_nf",
+                    "valor_subst_ant",
+                    "perc_icms_compra",
+                    "aliq_icms_compra",
+                    "icms_sem_despesas_nao_inclusas"
+                ]);
+    }
+
+
     /**
      * busca as ultimas modificações do produto da tabela no ERP
      */
@@ -208,10 +264,10 @@ class ProdutoService {
                         CASE
                             WHEN pro.origem IN ('N',
                                                 'M',
-                                                'L') THEN 'Nacional'
+                                                'L') THEN 'N'
                             WHEN pro.origem IN ('I',
                                                 'G',
-                                                'H') THEN 'Importado'
+                                                'H') THEN 'I'
                         END AS 'origem',
                         RIGHT(TRIM(pro.codinterno), 1) AS 'ref_end'
                     FROM CHANGETABLE (CHANGES [PRODUTOCAD], :lastVersion) AS ct
@@ -244,7 +300,34 @@ class ProdutoService {
                         cmp.comprimentocm AS 'comprimento'
                     FROM CHANGETABLE (CHANGES [COMPLEMENTOPRODUTO], :lastVersion) AS ct
                     INNER JOIN produtocad pro on pro.codpro = ct.codpro
-                    INNER JOIN complementoproduto CMP ON pro.codpro = cmp.codpro"
+                    INNER JOIN complementoproduto cmp ON pro.codpro = cmp.codpro"
+                    ,['lastVersion' => $lastVersionProdutoComplemento]);
+
+        return json_decode(json_encode($dados), true);
+    }
+
+
+     /**
+     * busca as ultimas modificações de complementos do produto da tabela no ERP
+     */
+    public static function getLastChagingTrackingProdutoPesquisa($lastVersionProdutoComplemento) {
+
+        $dados = DB::connection('sqlsrv_ERP')->select(
+                    "SELECT
+                        Pro.Codpro 			AS 'codpro',
+                        pro.dv 				AS 'dv',
+                        pro.codinterno		AS 'cod_interno_produtocad',
+                        pq.CODIGOEXTERNO	AS 'codigo_externo_pesquisa',
+                        pq.OID				AS 'oid_pesquisa',
+                        ISNULL((SELECT TOP(1) pq.valorcusto FROM pesquisa_r pq WHERE pq.criadoem <= GETDATE()  AND pq.codigoexterno = pro.codpro ORDER BY criadoem DESC),0) AS 'valor_custo',
+                        ISNULL((SELECT TOP(1) pq.Valorsubsttrib FROM pesquisa_r pq WHERE pq.criadoem <= GETDATE()  AND pq.codigoexterno = pro.codpro ORDER BY criadoem DESC),0) AS 'valor_subst_nf',
+                        ISNULL((SELECT TOP(1) pq.Valtribantecipada FROM pesquisa_r pq WHERE pq.criadoem <= GETDATE() AND pq.codigoexterno = pro.codpro ORDER BY criadoem DESC),0) AS 'valor_subst_ant',
+                        ISNULL((SELECT TOP 1 valor FROM composicao_r WHERE rtipopesquisa = '23188' AND rpesquisa IN (SELECT TOP 1 OID FROM pesquisa_r WHERE codigoexterno = pro.codpro ORDER BY criadoem DESC)),0) AS 'perc_icms_compra',
+                        ISNULL((SELECT TOP 1 valor FROM composicao_r WHERE rtipopesquisa = '23198' AND rpesquisa IN (SELECT TOP 1 OID FROM pesquisa_r WHERE codigoexterno = pro.codpro ORDER BY criadoem DESC)),0) AS 'aliq_icms_compra',
+                        ISNULL((SELECT TOP 1 valor FROM composicao_r WHERE rtipopesquisa = '23160' AND rpesquisa IN (SELECT TOP 1 OID FROM pesquisa_r WHERE codigoexterno = pro.codpro ORDER BY criadoem DESC)),0) AS 'icms_sem_despesas_nao_inclusas'
+                    FROM CHANGETABLE (CHANGES [PESQUISA], :lastVersion) AS ct
+                    INNER JOIN PESQUISA pq on pq.OID  = ct.oid
+                    INNER JOIN PRODUTOCAD pro on pro.codinterno = pq.CODIGOEXTERNO"
                     ,['lastVersion' => $lastVersionProdutoComplemento]);
 
         return json_decode(json_encode($dados), true);

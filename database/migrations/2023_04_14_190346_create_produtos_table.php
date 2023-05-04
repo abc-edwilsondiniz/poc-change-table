@@ -17,7 +17,6 @@ return new class extends Migration {
                         $table->integer('codpro');
                         $table->string('dv')->nullable(true);
                         $table->integer('id_fornecedor')->nullable(true);
-                        
                         $table->string('operation')->nullable(true);
                         $table->string('referencia', 17)->nullable(true);
                         $table->string('nome_original', 100)->nullable(true);
@@ -52,9 +51,18 @@ return new class extends Migration {
                         $table->string('tributacao_mg')->nullable(true);
                         $table->string('origem', 1)->nullable(true);
                         $table->string('ref_end', 17)->nullable(true);
+                        $table->string('cod_interno_produtocad', 50)->nullable(true);
+                        $table->string('codigo_externo_pesquisa', 50)->nullable(true);
+                        $table->string('oid_pesquisa', 50)->nullable(true);
+                        $table->decimal('valor_custo')->nullable(true);
+                        $table->decimal('valor_subst_nf')->nullable(true);
+                        $table->decimal('valor_subst_ant')->nullable(true);
+                        $table->decimal('perc_icms_compra')->nullable(true);
+                        $table->decimal('aliq_icms_compra')->nullable(true);
+                        $table->decimal('icms_sem_despesas_nao_inclusas')->nullable(true);
                         $table->timestamps();
                         //unique
-                        $table->unique(['codpro', 'dv', 'id_fornecedor']);
+                        $table->unique(['codpro', 'dv', 'id_fornecedor', 'oid_pesquisa']);
                     });
     }
 

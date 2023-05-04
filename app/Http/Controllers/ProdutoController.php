@@ -8,9 +8,9 @@ class ProdutoController extends Controller {
 
     public function produto() {
         try {
-            //--------------------------------------------------------------//
-            //      data off product
-            //--------------------------------------------------------------//
+            //** *********************************************************************************************************** *//
+            //      Data off product
+            //** *********************************************************************************************************** *//
             //Busco na tabela de configurações a ultima versão que utilizamos
             $lastVersionProduto = ProdutoService::getLastVersionProdutoControle();
 
@@ -28,9 +28,10 @@ class ProdutoController extends Controller {
             //atualiza na tabela de configurações
             ProdutoService::updateLastTrackingProdutoTable($updateVersionProduct);
 
-            //--------------------------------------------------------------//
-            //      complements off product
-            //--------------------------------------------------------------//
+
+            //** *********************************************************************************************************** *//
+            //      Complements off product
+            //** *********************************************************************************************************** *//
             //Busco na tabela de configurações a ultima versão que utilizamos
             $lastVersionProdutoComplemento = ProdutoService::getLastVersionProdutoComplementoControle();
 
@@ -48,8 +49,28 @@ class ProdutoController extends Controller {
             //atualiza na tabela de configurações
             ProdutoService::updateLastTrackingProdutoComplementoTable($updateVersionComplement);
 
-            dump('Last Execution: ' . (new \DateTime())->format('Y-m-d H:i:s'));
 
+            //** *********************************************************************************************************** *//
+            //      Search for product
+            //** *********************************************************************************************************** *//
+            //Busco na tabela de configurações a ultima versão que utilizamos
+            $lastVersionProdutoPesquisa = ProdutoService::getLastVersionProdutoPesquisaControle();
+
+            //Busco a última versão do change tracking do SQL Server
+            $updateVersionPesquisa = ProdutoService::getLastVersionTrackingTable();
+
+            //busco as ultimas alteraçẽos de complemento do produto no ERP
+            $dadosProdutoPesquisaTrackingERP = ProdutoService::getLastChagingTrackingProdutoPesquisa($lastVersionProdutoPesquisa);
+
+            $chunksPesquisa = array_chunk($dadosProdutoPesquisaTrackingERP, 500); // limita a carga da consulta em 500 registros por vez
+            foreach ($chunksPesquisa as $chunkPesquisa) {
+                //add/update na tabela "espelho produto"
+                ProdutoService::flushProdutoPesquisa($chunkPesquisa);
+            }
+            //atualiza na tabela de configurações
+            ProdutoService::updateLastTrackingProdutoPesquisaTable($updateVersionPesquisa);
+
+            dump('Last Execution: ' . (new \DateTime())->format('Y-m-d H:i:s'));
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
