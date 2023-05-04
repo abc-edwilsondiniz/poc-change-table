@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Configuracoes extends Model {
+class EnderecosClientes extends Model {
 
     use HasFactory;
-
+    
     protected $connection = 'mysql';
 
     /**
@@ -16,6 +16,6 @@ class Configuracoes extends Model {
      *
      * @var string
      */
-    protected $table = 'configuracoes';
+    protected $table = 'enderecos_clientes';
 
 }
